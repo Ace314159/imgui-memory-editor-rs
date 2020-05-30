@@ -465,6 +465,15 @@ extern "C" {
         base_display_addr: usize,
     );
 }
+extern "C" {
+    #[link_name = "\u{1}?DrawContents@MemoryEditor@@QEAAXPEAX_K1@Z"]
+    pub fn MemoryEditor_DrawContents(
+        this: *mut MemoryEditor,
+        mem_data_void: *mut ::std::os::raw::c_void,
+        mem_size: usize,
+        base_display_addr: usize,
+    );
+}
 impl MemoryEditor {
     #[inline]
     pub unsafe fn DrawWindow(
@@ -475,5 +484,14 @@ impl MemoryEditor {
         base_display_addr: usize,
     ) {
         MemoryEditor_DrawWindow(self, title, mem_data, mem_size, base_display_addr)
+    }
+    #[inline]
+    pub unsafe fn DrawContents(
+        &mut self,
+        mem_data_void: *mut ::std::os::raw::c_void,
+        mem_size: usize,
+        base_display_addr: usize,
+    ) {
+        MemoryEditor_DrawContents(self, mem_data_void, mem_size, base_display_addr)
     }
 }

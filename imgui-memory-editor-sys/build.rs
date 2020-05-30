@@ -1,5 +1,6 @@
 fn main() {
     println!("cargo:rerun-if-changed=wrapper.h");
+    println!("cargo:rerun-if-changed=wrapper.cpp");
 
     let bindings = bindgen::Builder::default()
         .raw_line("#![allow(non_snake_case)]")
