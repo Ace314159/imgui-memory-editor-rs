@@ -20,6 +20,6 @@ fn main() {
     
     cc::Build::new()
     .cpp(true)
-    .file("wrapper.h")
+    .file("wrapper.cpp")
     .compile("imgui-memory-editor");
 }
