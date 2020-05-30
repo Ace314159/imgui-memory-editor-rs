@@ -9,7 +9,6 @@ fn main() {
         .header("wrapper.h")
         .clang_arg("-x")
         .clang_arg("c++")
-        .generate_inline_functions(true)
         .default_enum_style(bindgen::EnumVariation::Consts)
         .size_t_is_usize(true)
         .prepend_enum_name(false)
@@ -26,9 +25,5 @@ fn main() {
     cc::Build::new()
     .cpp(true)
     .file("wrapper.cpp")
-    .flag_if_supported("-fno-inline-functions") // Clang
-    .flag_if_supported("-fkeep-inline-functions") // G++
-    .flag_if_supported("-Ob0") // MSVC
-    .flag_if_supported("-Zc:inline")
     .compile("imgui-memory-editor");
 }
