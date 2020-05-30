@@ -3,8 +3,7 @@ use imgui::{ImStr, Ui};
 use std::ffi::c_void;
 use std::mem::transmute;
 
-pub struct MemoryEditor<'a> {
-    title: &'a ImStr,
+pub struct MemoryEditor {
     data: *mut c_void,
     mem_size: usize,
     base_addr: usize,
@@ -14,10 +13,9 @@ pub struct MemoryEditor<'a> {
 // TODO: Implement supplying array of bytes
 // TODO: Implement write handler
 // TODO: Implement DrawContents
-impl<'a> MemoryEditor<'a> {
-    pub fn new(title: &'a ImStr, mem_size: usize) -> MemoryEditor<'a> {
+impl MemoryEditor {
+    pub fn new(mem_size: usize) -> MemoryEditor {
         MemoryEditor {
-            title,
             data: std::ptr::null_mut(),
             mem_size: mem_size as usize,
             base_addr: 0,
@@ -139,10 +137,10 @@ impl<'a> MemoryEditor<'a> {
     }
 
     #[inline]
-    pub fn build_with_window(&mut self, _: &Ui) {
+    pub fn build_with_window(&mut self, _: &Ui, title: &ImStr) {
         unsafe {
             self.memory_editor.DrawWindow(
-                self.title.as_ptr(),
+                title.as_ptr(),
                 self.data,
                 self.mem_size,
                 self.base_addr,
@@ -162,7 +160,7 @@ impl<'a> MemoryEditor<'a> {
     }
 }
 
-impl<'a> std::ops::Drop for MemoryEditor<'a> {
+impl std::ops::Drop for MemoryEditor {
     fn drop(&mut self) {
         // Drop the callback
         let _: Box<Box<dyn Fn(usize) -> u8>> = unsafe { Box::from_raw(self.data as *mut _) };
