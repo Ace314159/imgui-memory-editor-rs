@@ -5,7 +5,6 @@
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
 
-pub type size_t = ::std::os::raw::c_ulonglong;
 pub type ImGuiDataType = ::std::os::raw::c_int;
 pub type ImU8 = ::std::os::raw::c_uchar;
 pub type ImU32 = ::std::os::raw::c_uint;
@@ -24,26 +23,26 @@ pub struct MemoryEditor {
     pub OptMidColsCount: ::std::os::raw::c_int,
     pub OptAddrDigitsCount: ::std::os::raw::c_int,
     pub HighlightColor: ImU32,
-    pub ReadFn: ::std::option::Option<unsafe extern "C" fn(data: *const ImU8, off: size_t) -> ImU8>,
-    pub WriteFn: ::std::option::Option<unsafe extern "C" fn(data: *mut ImU8, off: size_t, d: ImU8)>,
+    pub ReadFn: ::std::option::Option<unsafe extern "C" fn(data: *const ImU8, off: usize) -> ImU8>,
+    pub WriteFn: ::std::option::Option<unsafe extern "C" fn(data: *mut ImU8, off: usize, d: ImU8)>,
     pub HighlightFn:
-        ::std::option::Option<unsafe extern "C" fn(data: *const ImU8, off: size_t) -> bool>,
+        ::std::option::Option<unsafe extern "C" fn(data: *const ImU8, off: usize) -> bool>,
     pub ContentsWidthChanged: bool,
-    pub DataPreviewAddr: size_t,
-    pub DataEditingAddr: size_t,
+    pub DataPreviewAddr: usize,
+    pub DataEditingAddr: usize,
     pub DataEditingTakeFocus: bool,
     pub DataInputBuf: [::std::os::raw::c_char; 32usize],
     pub AddrInputBuf: [::std::os::raw::c_char; 32usize],
-    pub GotoAddr: size_t,
-    pub HighlightMin: size_t,
-    pub HighlightMax: size_t,
+    pub GotoAddr: usize,
+    pub HighlightMin: usize,
+    pub HighlightMax: usize,
     pub PreviewEndianess: ::std::os::raw::c_int,
     pub PreviewDataType: ImGuiDataType,
 }
-pub const MemoryEditor_DataFormat_DataFormat_Bin: MemoryEditor_DataFormat = 0;
-pub const MemoryEditor_DataFormat_DataFormat_Dec: MemoryEditor_DataFormat = 1;
-pub const MemoryEditor_DataFormat_DataFormat_Hex: MemoryEditor_DataFormat = 2;
-pub const MemoryEditor_DataFormat_DataFormat_COUNT: MemoryEditor_DataFormat = 3;
+pub const DataFormat_Bin: MemoryEditor_DataFormat = 0;
+pub const DataFormat_Dec: MemoryEditor_DataFormat = 1;
+pub const DataFormat_Hex: MemoryEditor_DataFormat = 2;
+pub const DataFormat_COUNT: MemoryEditor_DataFormat = 3;
 pub type MemoryEditor_DataFormat = i32;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -472,8 +471,8 @@ extern "C" {
     #[link_name = "\u{1}?GotoAddrAndHighlight@MemoryEditor@@QEAAX_K0@Z"]
     pub fn MemoryEditor_GotoAddrAndHighlight(
         this: *mut MemoryEditor,
-        addr_min: size_t,
-        addr_max: size_t,
+        addr_min: usize,
+        addr_max: usize,
     );
 }
 extern "C" {
@@ -481,8 +480,8 @@ extern "C" {
     pub fn MemoryEditor_CalcSizes(
         this: *mut MemoryEditor,
         s: *mut MemoryEditor_Sizes,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     );
 }
 extern "C" {
@@ -491,8 +490,8 @@ extern "C" {
         this: *mut MemoryEditor,
         title: *const ::std::os::raw::c_char,
         mem_data: *mut ::std::os::raw::c_void,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     );
 }
 extern "C" {
@@ -500,8 +499,8 @@ extern "C" {
     pub fn MemoryEditor_DrawContents(
         this: *mut MemoryEditor,
         mem_data_void: *mut ::std::os::raw::c_void,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     );
 }
 extern "C" {
@@ -510,8 +509,8 @@ extern "C" {
         this: *mut MemoryEditor,
         s: *const MemoryEditor_Sizes,
         mem_data: *mut ::std::os::raw::c_void,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     );
 }
 extern "C" {
@@ -520,8 +519,8 @@ extern "C" {
         this: *mut MemoryEditor,
         s: *const MemoryEditor_Sizes,
         mem_data_void: *mut ::std::os::raw::c_void,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     );
 }
 extern "C" {
@@ -536,7 +535,7 @@ extern "C" {
     pub fn MemoryEditor_DataTypeGetSize(
         this: *const MemoryEditor,
         data_type: ImGuiDataType,
-    ) -> size_t;
+    ) -> usize;
 }
 extern "C" {
     #[link_name = "\u{1}?DataFormatGetDesc@MemoryEditor@@QEBAPEBDW4DataFormat@1@@Z"]
@@ -554,7 +553,7 @@ extern "C" {
     pub fn MemoryEditor_EndianessCopyBigEndian(
         _dst: *mut ::std::os::raw::c_void,
         _src: *mut ::std::os::raw::c_void,
-        s: size_t,
+        s: usize,
         is_little_endian: ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void;
 }
@@ -563,7 +562,7 @@ extern "C" {
     pub fn MemoryEditor_EndianessCopyLittleEndian(
         _dst: *mut ::std::os::raw::c_void,
         _src: *mut ::std::os::raw::c_void,
-        s: size_t,
+        s: usize,
         is_little_endian: ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void;
 }
@@ -573,7 +572,7 @@ extern "C" {
         this: *const MemoryEditor,
         dst: *mut ::std::os::raw::c_void,
         src: *mut ::std::os::raw::c_void,
-        size: size_t,
+        size: usize,
     ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
@@ -588,13 +587,13 @@ extern "C" {
     #[link_name = "\u{1}?DrawPreviewData@MemoryEditor@@QEBAX_KPEBE0HW4DataFormat@1@PEAD0@Z"]
     pub fn MemoryEditor_DrawPreviewData(
         this: *const MemoryEditor,
-        addr: size_t,
+        addr: usize,
         mem_data: *const ImU8,
-        mem_size: size_t,
+        mem_size: usize,
         data_type: ImGuiDataType,
         data_format: MemoryEditor_DataFormat,
         out_buf: *mut ::std::os::raw::c_char,
-        out_buf_size: size_t,
+        out_buf_size: usize,
     );
 }
 extern "C" {
@@ -603,15 +602,15 @@ extern "C" {
 }
 impl MemoryEditor {
     #[inline]
-    pub unsafe fn GotoAddrAndHighlight(&mut self, addr_min: size_t, addr_max: size_t) {
+    pub unsafe fn GotoAddrAndHighlight(&mut self, addr_min: usize, addr_max: usize) {
         MemoryEditor_GotoAddrAndHighlight(self, addr_min, addr_max)
     }
     #[inline]
     pub unsafe fn CalcSizes(
         &mut self,
         s: *mut MemoryEditor_Sizes,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     ) {
         MemoryEditor_CalcSizes(self, s, mem_size, base_display_addr)
     }
@@ -620,8 +619,8 @@ impl MemoryEditor {
         &mut self,
         title: *const ::std::os::raw::c_char,
         mem_data: *mut ::std::os::raw::c_void,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     ) {
         MemoryEditor_DrawWindow(self, title, mem_data, mem_size, base_display_addr)
     }
@@ -629,8 +628,8 @@ impl MemoryEditor {
     pub unsafe fn DrawContents(
         &mut self,
         mem_data_void: *mut ::std::os::raw::c_void,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     ) {
         MemoryEditor_DrawContents(self, mem_data_void, mem_size, base_display_addr)
     }
@@ -639,8 +638,8 @@ impl MemoryEditor {
         &mut self,
         s: *const MemoryEditor_Sizes,
         mem_data: *mut ::std::os::raw::c_void,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     ) {
         MemoryEditor_DrawOptionsLine(self, s, mem_data, mem_size, base_display_addr)
     }
@@ -649,8 +648,8 @@ impl MemoryEditor {
         &mut self,
         s: *const MemoryEditor_Sizes,
         mem_data_void: *mut ::std::os::raw::c_void,
-        mem_size: size_t,
-        base_display_addr: size_t,
+        mem_size: usize,
+        base_display_addr: usize,
     ) {
         MemoryEditor_DrawPreviewLine(self, s, mem_data_void, mem_size, base_display_addr)
     }
@@ -662,7 +661,7 @@ impl MemoryEditor {
         MemoryEditor_DataTypeGetDesc(self, data_type)
     }
     #[inline]
-    pub unsafe fn DataTypeGetSize(&self, data_type: ImGuiDataType) -> size_t {
+    pub unsafe fn DataTypeGetSize(&self, data_type: ImGuiDataType) -> usize {
         MemoryEditor_DataTypeGetSize(self, data_type)
     }
     #[inline]
@@ -680,7 +679,7 @@ impl MemoryEditor {
     pub unsafe fn EndianessCopyBigEndian(
         _dst: *mut ::std::os::raw::c_void,
         _src: *mut ::std::os::raw::c_void,
-        s: size_t,
+        s: usize,
         is_little_endian: ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void {
         MemoryEditor_EndianessCopyBigEndian(_dst, _src, s, is_little_endian)
@@ -689,7 +688,7 @@ impl MemoryEditor {
     pub unsafe fn EndianessCopyLittleEndian(
         _dst: *mut ::std::os::raw::c_void,
         _src: *mut ::std::os::raw::c_void,
-        s: size_t,
+        s: usize,
         is_little_endian: ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_void {
         MemoryEditor_EndianessCopyLittleEndian(_dst, _src, s, is_little_endian)
@@ -699,7 +698,7 @@ impl MemoryEditor {
         &self,
         dst: *mut ::std::os::raw::c_void,
         src: *mut ::std::os::raw::c_void,
-        size: size_t,
+        size: usize,
     ) -> *mut ::std::os::raw::c_void {
         MemoryEditor_EndianessCopy(self, dst, src, size)
     }
@@ -714,13 +713,13 @@ impl MemoryEditor {
     #[inline]
     pub unsafe fn DrawPreviewData(
         &self,
-        addr: size_t,
+        addr: usize,
         mem_data: *const ImU8,
-        mem_size: size_t,
+        mem_size: usize,
         data_type: ImGuiDataType,
         data_format: MemoryEditor_DataFormat,
         out_buf: *mut ::std::os::raw::c_char,
-        out_buf_size: size_t,
+        out_buf_size: usize,
     ) {
         MemoryEditor_DrawPreviewData(
             self,
