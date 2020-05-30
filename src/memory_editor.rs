@@ -57,6 +57,12 @@ impl MemoryEditor {
     }
 
     #[inline]
+    pub fn base_addr(mut self, base_addr: usize) -> Self {
+        self.base_addr = base_addr;
+        self
+    }
+
+    #[inline]
     // Set to false when DrawWindow() was closed. Ignore if not using DrawWindow().
     pub fn open(&self) -> bool {
         self.memory_editor.Open
