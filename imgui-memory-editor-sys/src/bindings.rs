@@ -5,11 +5,10 @@
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
 
-pub type size_t = ::std::os::raw::c_ulong;
+pub type size_t = ::std::os::raw::c_ulonglong;
 pub type ImGuiDataType = ::std::os::raw::c_int;
 pub type ImU8 = ::std::os::raw::c_uchar;
 pub type ImU32 = ::std::os::raw::c_uint;
-pub type __uint8_t = ::std::os::raw::c_uchar;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MemoryEditor {
@@ -45,7 +44,7 @@ pub const MemoryEditor_DataFormat_DataFormat_Bin: MemoryEditor_DataFormat = 0;
 pub const MemoryEditor_DataFormat_DataFormat_Dec: MemoryEditor_DataFormat = 1;
 pub const MemoryEditor_DataFormat_DataFormat_Hex: MemoryEditor_DataFormat = 2;
 pub const MemoryEditor_DataFormat_DataFormat_COUNT: MemoryEditor_DataFormat = 3;
-pub type MemoryEditor_DataFormat = u32;
+pub type MemoryEditor_DataFormat = i32;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct MemoryEditor_Sizes {
@@ -181,7 +180,7 @@ fn bindgen_test_layout_MemoryEditor_Sizes() {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor5SizesC1Ev"]
+    #[link_name = "\u{1}??0Sizes@MemoryEditor@@QEAA@XZ"]
     pub fn MemoryEditor_Sizes_Sizes(this: *mut MemoryEditor_Sizes);
 }
 impl MemoryEditor_Sizes {
@@ -470,7 +469,7 @@ fn bindgen_test_layout_MemoryEditor() {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor20GotoAddrAndHighlightEmm"]
+    #[link_name = "\u{1}?GotoAddrAndHighlight@MemoryEditor@@QEAAX_K0@Z"]
     pub fn MemoryEditor_GotoAddrAndHighlight(
         this: *mut MemoryEditor,
         addr_min: size_t,
@@ -478,7 +477,7 @@ extern "C" {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor9CalcSizesERNS_5SizesEmm"]
+    #[link_name = "\u{1}?CalcSizes@MemoryEditor@@QEAAXAEAUSizes@1@_K1@Z"]
     pub fn MemoryEditor_CalcSizes(
         this: *mut MemoryEditor,
         s: *mut MemoryEditor_Sizes,
@@ -487,7 +486,7 @@ extern "C" {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor10DrawWindowEPKcPvmm"]
+    #[link_name = "\u{1}?DrawWindow@MemoryEditor@@QEAAXPEBDPEAX_K2@Z"]
     pub fn MemoryEditor_DrawWindow(
         this: *mut MemoryEditor,
         title: *const ::std::os::raw::c_char,
@@ -497,7 +496,7 @@ extern "C" {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor12DrawContentsEPvmm"]
+    #[link_name = "\u{1}?DrawContents@MemoryEditor@@QEAAXPEAX_K1@Z"]
     pub fn MemoryEditor_DrawContents(
         this: *mut MemoryEditor,
         mem_data_void: *mut ::std::os::raw::c_void,
@@ -506,7 +505,7 @@ extern "C" {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor15DrawOptionsLineERKNS_5SizesEPvmm"]
+    #[link_name = "\u{1}?DrawOptionsLine@MemoryEditor@@QEAAXAEBUSizes@1@PEAX_K2@Z"]
     pub fn MemoryEditor_DrawOptionsLine(
         this: *mut MemoryEditor,
         s: *const MemoryEditor_Sizes,
@@ -516,7 +515,7 @@ extern "C" {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor15DrawPreviewLineERKNS_5SizesEPvmm"]
+    #[link_name = "\u{1}?DrawPreviewLine@MemoryEditor@@QEAAXAEBUSizes@1@PEAX_K2@Z"]
     pub fn MemoryEditor_DrawPreviewLine(
         this: *mut MemoryEditor,
         s: *const MemoryEditor_Sizes,
@@ -526,32 +525,32 @@ extern "C" {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZNK12MemoryEditor15DataTypeGetDescEi"]
+    #[link_name = "\u{1}?DataTypeGetDesc@MemoryEditor@@QEBAPEBDH@Z"]
     pub fn MemoryEditor_DataTypeGetDesc(
         this: *const MemoryEditor,
         data_type: ImGuiDataType,
     ) -> *const ::std::os::raw::c_char;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZNK12MemoryEditor15DataTypeGetSizeEi"]
+    #[link_name = "\u{1}?DataTypeGetSize@MemoryEditor@@QEBA_KH@Z"]
     pub fn MemoryEditor_DataTypeGetSize(
         this: *const MemoryEditor,
         data_type: ImGuiDataType,
     ) -> size_t;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZNK12MemoryEditor17DataFormatGetDescENS_10DataFormatE"]
+    #[link_name = "\u{1}?DataFormatGetDesc@MemoryEditor@@QEBAPEBDW4DataFormat@1@@Z"]
     pub fn MemoryEditor_DataFormatGetDesc(
         this: *const MemoryEditor,
         data_format: MemoryEditor_DataFormat,
     ) -> *const ::std::os::raw::c_char;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZNK12MemoryEditor11IsBigEndianEv"]
+    #[link_name = "\u{1}?IsBigEndian@MemoryEditor@@QEBA_NXZ"]
     pub fn MemoryEditor_IsBigEndian(this: *const MemoryEditor) -> bool;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor22EndianessCopyBigEndianEPvS0_mi"]
+    #[link_name = "\u{1}?EndianessCopyBigEndian@MemoryEditor@@SAPEAXPEAX0_KH@Z"]
     pub fn MemoryEditor_EndianessCopyBigEndian(
         _dst: *mut ::std::os::raw::c_void,
         _src: *mut ::std::os::raw::c_void,
@@ -560,7 +559,7 @@ extern "C" {
     ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditor25EndianessCopyLittleEndianEPvS0_mi"]
+    #[link_name = "\u{1}?EndianessCopyLittleEndian@MemoryEditor@@SAPEAXPEAX0_KH@Z"]
     pub fn MemoryEditor_EndianessCopyLittleEndian(
         _dst: *mut ::std::os::raw::c_void,
         _src: *mut ::std::os::raw::c_void,
@@ -569,7 +568,7 @@ extern "C" {
     ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZNK12MemoryEditor13EndianessCopyEPvS0_m"]
+    #[link_name = "\u{1}?EndianessCopy@MemoryEditor@@QEBAPEAXPEAX0_K@Z"]
     pub fn MemoryEditor_EndianessCopy(
         this: *const MemoryEditor,
         dst: *mut ::std::os::raw::c_void,
@@ -578,7 +577,7 @@ extern "C" {
     ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZNK12MemoryEditor12FormatBinaryEPKhi"]
+    #[link_name = "\u{1}?FormatBinary@MemoryEditor@@QEBAPEBDPEBEH@Z"]
     pub fn MemoryEditor_FormatBinary(
         this: *const MemoryEditor,
         buf: *const u8,
@@ -586,7 +585,7 @@ extern "C" {
     ) -> *const ::std::os::raw::c_char;
 }
 extern "C" {
-    #[link_name = "\u{1}_ZNK12MemoryEditor15DrawPreviewDataEmPKhmiNS_10DataFormatEPcm"]
+    #[link_name = "\u{1}?DrawPreviewData@MemoryEditor@@QEBAX_KPEBE0HW4DataFormat@1@PEAD0@Z"]
     pub fn MemoryEditor_DrawPreviewData(
         this: *const MemoryEditor,
         addr: size_t,
@@ -599,7 +598,7 @@ extern "C" {
     );
 }
 extern "C" {
-    #[link_name = "\u{1}_ZN12MemoryEditorC1Ev"]
+    #[link_name = "\u{1}??0MemoryEditor@@QEAA@XZ"]
     pub fn MemoryEditor_MemoryEditor(this: *mut MemoryEditor);
 }
 impl MemoryEditor {
