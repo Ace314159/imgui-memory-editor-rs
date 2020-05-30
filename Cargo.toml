@@ -3,9 +3,13 @@ name = "imgui-memory-editor"
 version = "0.1.0"
 authors = ["Akash Munagala <akash.munagala@gmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Rust bindings for imgui memory editor"
+repository = "https://github.com/Ace314159/imgui-memory-editor-rs"
+keywords = ["imgui", "memory", "editor"]
+categories = ["gui", "api-bindings"]
+readme = "README.md"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 imgui = "0.3.0"
-imgui-memory-editor-sys = { path = "imgui-memory-editor-sys" }
+imgui-memory-editor-sys = { path = "imgui-memory-editor-sys", version = "0.1.0" }
