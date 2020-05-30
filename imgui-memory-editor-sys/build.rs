@@ -1,12 +1,11 @@
+use std::env;
+use std::path::PathBuf;
+
 fn main() {
     println!("cargo:rerun-if-changed=wrapper.h");
     println!("cargo:rerun-if-changed=wrapper.cpp");
 
     let bindings = bindgen::Builder::default()
-        .raw_line("#![allow(non_snake_case)]")
-        .raw_line("#![allow(non_upper_case_globals)]")
-        .raw_line("#![allow(dead_code)]")
-        .raw_line("#![allow(non_camel_case_types)]")
         .header("wrapper.h")
         .clang_arg("-x")
         .clang_arg("c++")
@@ -19,8 +18,9 @@ fn main() {
         .whitelist_function("MemoryEditor_.*")
         .generate()
         .expect("Unable to generate bindings");
+    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings
-        .write_to_file("src/bindings.rs")
+        .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
     
     cc::Build::new()
