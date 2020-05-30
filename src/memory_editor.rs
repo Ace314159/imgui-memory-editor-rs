@@ -57,6 +57,12 @@ impl MemoryEditor {
     }
 
     #[inline]
+    pub fn mem_size(mut self, mem_size: usize) -> Self {
+        self.mem_size = mem_size;
+        self
+    }
+
+    #[inline]
     pub fn base_addr(mut self, base_addr: usize) -> Self {
         self.base_addr = base_addr;
         self
