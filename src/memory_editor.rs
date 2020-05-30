@@ -3,6 +3,7 @@ use imgui::{ImStr, Ui};
 use std::ffi::c_void;
 use std::mem::transmute;
 
+#[derive(Debug)]
 pub struct MemoryEditor {
     data: *mut c_void,
     mem_size: usize,
