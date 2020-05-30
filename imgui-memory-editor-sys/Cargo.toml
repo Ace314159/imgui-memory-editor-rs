@@ -1,0 +1,9 @@
+[package]
+name = "imgui-memory-editor-sys"
+version = "0.1.0"
+authors = ["Akash Munagala <akash.munagala@gmail.com>"]
+edition = "2018"
+
+[build-dependencies]
+bindgen = "0.54.0"
+cc = "1.0.54"
