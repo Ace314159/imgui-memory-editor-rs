@@ -1,6 +1,6 @@
 [package]
 name = "imgui-memory-editor-sys"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Akash Munagala <akash.munagala@gmail.com>"]
 edition = "2018"
 description = "Raw FFI bindings to imgui memory editor"
