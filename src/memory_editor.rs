@@ -87,8 +87,8 @@ impl MemoryEditor {
     }
     // display values in HexII representation instead of regular hexadecimal: hide null/zero bytes, ascii values as ".X".
     #[inline]
-    pub fn show_hex(mut self, show_hex: bool) -> Self {
-        self.memory_editor.OptShowHexII = show_hex;
+    pub fn show_hexii(mut self, show_hexii: bool) -> Self {
+        self.memory_editor.OptShowHexII = show_hexii;
         self
     }
     // display ASCII representation on the right side.
