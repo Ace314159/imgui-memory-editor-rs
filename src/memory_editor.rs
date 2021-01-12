@@ -27,20 +27,22 @@ impl<'a> MemoryEditor<'a> {
         }
     }
 
+    // Size of memory in bytes (Automatically set if using bytes)
     #[inline]
     pub fn mem_size(mut self, mem_size: usize) -> Self {
         self.mem_size = mem_size;
         self
     }
 
+    // The base addr displayed
     #[inline]
     pub fn base_addr(mut self, base_addr: usize) -> Self {
         self.base_addr = base_addr;
         self
     }
 
-    #[inline]
     // Set to false when DrawWindow() was closed. Ignore if not using DrawWindow().
+    #[inline]
     pub fn open(&self) -> bool {
         self.raw.Open
     }
@@ -134,6 +136,7 @@ impl<'a> MemoryEditor<'a> {
     }
 
     #[inline]
+    // Use a vec with the bytes
     pub fn bytes(mut self, bytes: &'a mut Vec<u8>) -> Self {
         self.mem_size = bytes.len();
         self.data = Data::Bytes(bytes);
