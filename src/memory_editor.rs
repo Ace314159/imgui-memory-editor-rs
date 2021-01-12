@@ -1,5 +1,5 @@
 extern crate imgui;
-use imgui::{ImStr, Ui};
+use imgui::{ImColor, ImStr, Ui};
 use std::ffi::c_void;
 
 enum Data<'a> {
@@ -110,8 +110,8 @@ impl<'a> MemoryEditor<'a> {
     }
     // background color of highlighted bytes.
     #[inline]
-    pub fn highlight_color(mut self, r: u32, g: u32, b: u32, a: u32) -> Self {
-        self.raw.HighlightColor = a << 24 | b << 16 | g << 8 | r << 0;
+    pub fn highlight_color(mut self, color: ImColor) -> Self {
+        self.raw.HighlightColor = color.into();
         self
     }
     // optional handler to read bytes.
