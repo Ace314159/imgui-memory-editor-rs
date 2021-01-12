@@ -9,6 +9,7 @@ enum Data<'a> {
 }
 
 pub struct MemoryEditor<'a> {
+    window_name: Option<&'a ImStr>,
     data: Data<'a>,
     mem_size: usize,
     base_addr: usize,
@@ -20,6 +21,7 @@ impl<'a> MemoryEditor<'a> {
         let mut raw = Default::default();
         unsafe { sys::Editor_Create(&mut raw) }
         MemoryEditor {
+            window_name: None,
             data: Data::None,
             mem_size: 0,
             base_addr: 0,
@@ -142,30 +144,42 @@ impl<'a> MemoryEditor<'a> {
         self.data = Data::Bytes(bytes);
         self
     }
-
+    // When drawing, create a window with this name
     #[inline]
-    pub fn build_with_window(&mut self, _: &Ui, title: &ImStr) {
-        unsafe {
-            sys::Editor_DrawWindow(
-                &mut self.raw,
-                title.as_ptr(),
-                self.data(),
-                self.mem_size,
-                self.base_addr,
-            );
-        };
+    pub fn draw_window(mut self, window_name: &'a ImStr) -> Self {
+        self.window_name = Some(window_name);
+        self
+    }
+    // No longer create a window when drawing
+    #[inline]
+    pub fn no_window(mut self) -> Self {
+        self.window_name = None;
+        self
     }
 
     #[inline]
-    pub fn build_without_window(&mut self, _: &Ui) {
-        unsafe {
-            sys::Editor_DrawContents(
-                &mut self.raw,
-                self.data(),
-                self.mem_size,
-                self.base_addr,
-            );
-        };
+    pub fn draw(&mut self, _: &Ui) {
+        if let Some(title) = self.window_name {
+            unsafe {
+                sys::Editor_DrawWindow(
+                    &mut self.raw,
+                    title.as_ptr(),
+                    self.data(),
+                    self.mem_size,
+                    self.base_addr,
+                );
+            };
+        } else {
+            unsafe {
+                sys::Editor_DrawContents(
+                    &mut self.raw,
+                    self.data(),
+                    self.mem_size,
+                    self.base_addr,
+                );
+            };
+        }
+        
     }
 
     fn data(&mut self) -> *mut c_void {
