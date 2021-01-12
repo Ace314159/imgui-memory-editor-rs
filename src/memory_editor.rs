@@ -152,7 +152,8 @@ impl MemoryEditor {
     #[inline]
     pub fn build_with_window(&mut self, _: &Ui, title: &ImStr) {
         unsafe {
-            self.memory_editor.DrawWindow(
+            sys::Editor_DrawWindow(
+                &mut self.memory_editor,
                 title.as_ptr(),
                 self.data,
                 self.mem_size,
@@ -164,7 +165,8 @@ impl MemoryEditor {
     #[inline]
     pub fn build_without_window(&mut self, _: &Ui) {
         unsafe {
-            self.memory_editor.DrawContents(
+            sys::Editor_DrawContents(
+                &mut self.memory_editor,
                 self.data,
                 self.mem_size,
                 self.base_addr,

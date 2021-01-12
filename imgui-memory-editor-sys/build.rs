@@ -1,30 +1,15 @@
-use std::env;
-use std::path::PathBuf;
+use std::path::Path;
 
 fn main() {
-    println!("cargo:rerun-if-changed=wrapper.h");
     println!("cargo:rerun-if-changed=wrapper.cpp");
+    println!("cargo:rustc-link-lib=cimgui");
 
-    let bindings = bindgen::Builder::default()
-        .header("wrapper.h")
-        .clang_arg("-x")
-        .clang_arg("c++")
-        .default_enum_style(bindgen::EnumVariation::Consts)
-        .size_t_is_usize(true)
-        .prepend_enum_name(false)
-        .generate_comments(false)
-        .layout_tests(true)
-        .whitelist_type("MemoryEditor")
-        .whitelist_function("MemoryEditor_.*")
-        .generate()
-        .expect("Unable to generate bindings");
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
-    
+    let imgui_dir = std::env::var_os("DEP_IMGUI_THIRD_PARTY").expect("imgui-sys expected to specify imgui dir");
+    let imgui_dir = Path::new(&imgui_dir).join("imgui");
+
     cc::Build::new()
     .cpp(true)
+    .include(imgui_dir)
     .file("wrapper.cpp")
     .compile("imgui-memory-editor");
 }
