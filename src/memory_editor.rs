@@ -5,7 +5,7 @@ use std::ffi::c_void;
 enum Data<'a> {
     None,
     Bytes(&'a mut Vec<u8>),
-    Callback(Box<dyn FnMut(usize) -> u8 + 'a>),
+    Callback(Option<Box<dyn FnMut(usize) -> u8 + 'a>>, Option<Box<dyn FnMut(usize, u8) + 'a>>),
 }
 
 pub struct MemoryEditor<'a> {
@@ -15,7 +15,6 @@ pub struct MemoryEditor<'a> {
     raw: sys::MemoryEditor,
 }
 
-// TODO: Implement write handler
 impl<'a> MemoryEditor<'a> {
     pub fn new() -> MemoryEditor<'a> {
         let mut raw = Default::default();
@@ -114,7 +113,23 @@ impl<'a> MemoryEditor<'a> {
     // optional handler to read bytes.
     #[inline]
     pub fn read_fn<F>(mut self, read_fn: F) -> Self where F: FnMut(usize) -> u8 + 'a {
-        self.data = Data::Callback(Box::new(Box::new(read_fn)));
+        let read_fn = Box::new(read_fn);
+        use Data::Callback;
+        self.data = match self.data {
+            Callback(_, write_fn) => Callback(Some(read_fn), write_fn),
+            _ => Callback(Some(read_fn), None),
+        };
+        self
+    }
+    // optional handler to write bytes.
+    #[inline]
+    pub fn write_fn<F>(mut self, write_fn: F) -> Self where F: FnMut(usize, u8) + 'a {
+        let write_fn = Box::new(write_fn);
+        use Data::Callback;
+        self.data = match self.data {
+            Callback(read_fn, _) => Callback(read_fn, Some(write_fn)),
+            _ => Callback(None, Some(write_fn)),
+        };
         self
     }
 
@@ -152,15 +167,32 @@ impl<'a> MemoryEditor<'a> {
 
     fn data(&mut self) -> *mut c_void {
         self.raw.ReadFn = None;
+        self.raw.WriteFn = None;
         match &mut self.data {
             Data::None => panic!("No data specified!"),
             Data::Bytes(bytes) => bytes.as_mut_ptr() as *mut _ as *mut c_void,
-            Data::Callback(read_fn) => {
-                unsafe extern "C" fn wrapper(data: *const u8, off: usize) -> u8 {
-                    (*(data as *mut Box<dyn FnMut(usize) -> u8>))(off)
+            Data::Callback(read_fn, write_fn) => {
+                if read_fn.is_some() {
+                    unsafe extern "C" fn read_wrapper(data: *const u8, off: usize) -> u8 {
+                        let data = &mut *(data as *mut Data);
+                        match data {
+                            Data::Callback(read_fn, _) => read_fn.as_mut().unwrap()(off),
+                            _ => unreachable!(),
+                        }
+                    }
+                    self.raw.ReadFn = Some(read_wrapper);
                 }
-                self.raw.ReadFn = Some(wrapper);
-                read_fn as *mut Box<dyn FnMut(usize) -> u8> as *mut c_void
+                if write_fn.is_some() {
+                    unsafe extern "C" fn write_wrapper(data: *mut u8, off: usize, d: u8) {
+                        let data = &mut *(data as *mut Data);
+                        match data {
+                            Data::Callback(_, write_fn) => write_fn.as_mut().unwrap()(off, d),
+                            _ => unreachable!(),
+                        }
+                    }
+                    self.raw.WriteFn = Some(write_wrapper);
+                }
+                &mut self.data as *mut _ as *mut c_void
             },
         }
     }
