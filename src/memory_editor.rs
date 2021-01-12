@@ -16,40 +16,13 @@ pub struct MemoryEditor {
 // TODO: Implement DrawContents
 impl MemoryEditor {
     pub fn new(mem_size: usize) -> MemoryEditor {
+        let mut memory_editor = Default::default();
+        unsafe { sys::Editor_Create(&mut memory_editor) }
         MemoryEditor {
             data: std::ptr::null_mut(),
             mem_size: mem_size as usize,
             base_addr: 0,
-            memory_editor: sys::MemoryEditor {
-                Open: true,
-                ReadOnly: true,
-                Cols: 16,
-                OptShowOptions: true,
-                OptShowDataPreview: false,
-                OptShowHexII: false,
-                OptShowAscii: true,
-                OptGreyOutZeroes: true,
-                OptUpperCaseHex: true,
-                OptMidColsCount: 8,
-                OptAddrDigitsCount: 0,
-                HighlightColor: Self::get_color32(255, 255, 255, 50),
-                ReadFn: None,
-                WriteFn: None,
-                HighlightFn: None,
-
-                // State/Internals
-                ContentsWidthChanged: false,
-                DataPreviewAddr: usize::max_value() - 1,
-                DataEditingAddr: usize::max_value() - 1,
-                DataEditingTakeFocus: false,
-                DataInputBuf: [0; 32],
-                AddrInputBuf: [0; 32],
-                GotoAddr: usize::max_value() - 1,
-                HighlightMin: usize::max_value() - 1,
-                HighlightMax: usize::max_value() - 1,
-                PreviewEndianess: 0,
-                PreviewDataType: 4, // ImGuiDataType_S32
-            },
+            memory_editor,
         }
     }
 
