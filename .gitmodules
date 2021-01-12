@@ -1,6 +1,3 @@
-[submodule ".\\imgui-memory-editor-sys\\vendor\\imgui"]
-	path = .\\imgui-memory-editor-sys\\vendor\\imgui
-	url = git@github.com:ocornut/imgui.git
 [submodule ".\\imgui-memory-editor-sys\\vendor\\imgui-memory-editor"]
 	path = .\\imgui-memory-editor-sys\\vendor\\imgui-memory-editor
 	url = git@github.com:ocornut/imgui_club.git
