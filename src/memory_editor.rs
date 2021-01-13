@@ -5,12 +5,19 @@ use std::ffi::c_void;
 // TODO: Alias ReadHandlerTrait and writeHandlerTrait to FnMuts once trait_alias is stabilized
 type ReadHandler<'a, T> = Option<Box<dyn FnMut(&T, usize) -> u8 + 'a>>;
 type WriteHandler<'a, T> = Option<Box<dyn FnMut(&mut T, usize, u8) + 'a>>;
-type MemData<'a, 'b, T> = (&'b mut ReadHandler<'a, T>, &'b mut WriteHandler<'a, T>, &'b mut T);
+type HighlightHandler<'a, T> = Option<Box<dyn FnMut(&T, usize) -> bool + 'a>>;
+type MemData<'a, 'b, T> = (
+    &'b mut ReadHandler<'a, T>,
+    &'b mut WriteHandler<'a, T>,
+    &'b mut HighlightHandler<'a, T>,
+    &'b mut T
+);
 
 pub struct MemoryEditor<'a, T> {
     window_name: Option<&'a ImStr>,
     read_fn: ReadHandler<'a, T>,
     write_fn: WriteHandler<'a, T>,
+    highlight_fn: HighlightHandler<'a, T>,
     mem_size: usize,
     base_addr: usize,
     raw: sys::MemoryEditor,
@@ -24,6 +31,7 @@ impl<'a, T> MemoryEditor<'a, T> {
             window_name: None,
             read_fn: None,
             write_fn: None,
+            highlight_fn: None,
             mem_size: 0,
             base_addr: 0,
             raw,
@@ -127,6 +135,12 @@ impl<'a, T> MemoryEditor<'a, T> {
         self.write_fn = Some(Box::new(write_fn));
         self
     }
+    // optional handler to return Highlight property (to support non-contiguous highlighting).
+    #[inline]
+    pub fn highlight_fn<F>(mut self, highlight_fn: F) -> Self where F: FnMut(&T, usize) -> bool + 'a {
+        self.highlight_fn = Some(Box::new(highlight_fn));
+        self
+    }
 
     // When drawing, create a window with this name
     #[inline]
@@ -146,8 +160,14 @@ impl<'a, T> MemoryEditor<'a, T> {
     pub fn draw(&mut self, _: &Ui, user_data: &mut T) {
         self.raw.ReadFn = Some(read_wrapper::<T>);
         self.raw.WriteFn = Some(write_wrapper::<T>);
+        self.raw.HighlightFn = if self.highlight_fn.is_some() { Some(highlight_wrapper::<T>) } else { None };
 
-        let mut data = (&mut self.read_fn, &mut self.write_fn, user_data);
+        let mut data = (
+            &mut self.read_fn,
+            &mut self.write_fn,
+            &mut self.highlight_fn,
+            user_data
+        );
         let mem_data = &mut data as *mut MemData<T> as *mut c_void;
         if let Some(title) = self.window_name {
             unsafe {
@@ -173,16 +193,22 @@ impl<'a, T> MemoryEditor<'a, T> {
 }
 
 unsafe extern "C" fn read_wrapper<'a, T>(data: *const u8, off: usize) -> u8 {
-    let (read_fn, _, user_data) = &mut *(data as *mut MemData<T>);
+    let (read_fn, _, _, user_data) = &mut *(data as *mut MemData<T>);
 
     if let Some(read_fn) = read_fn {
         read_fn(user_data, off)
     } else { panic!("No Read Handler Set!") }
 }
 unsafe extern "C" fn write_wrapper<'a, T>(data: *mut u8, off: usize, d: u8) {
-    let (_, write_fn, user_data) = &mut *(data as *mut MemData<T>);
+    let (_, write_fn, _, user_data) = &mut *(data as *mut MemData<T>);
 
     if let Some(write_fn) = write_fn {
         write_fn(user_data, off, d)
     } else { panic!("No Write Handler Set!") }
+}
+unsafe extern "C" fn highlight_wrapper<'a, T>(data: *const u8, off: usize) -> bool {
+    let (_, _, highlight_fn, user_data) = &mut *(data as *mut MemData<T>);
+
+    // This shouldn't get called if a highlight function wasn't given
+    (highlight_fn.as_mut().unwrap())(user_data, off)
 }
