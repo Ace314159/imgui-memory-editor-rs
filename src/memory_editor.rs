@@ -159,6 +159,14 @@ impl<'a, T> MemoryEditor<'a, T> {
     // Draw the memory editor with read and write functions set
     #[inline]
     pub fn draw(&mut self, _: &Ui, user_data: &mut T) {
+        assert!(
+            self.raw.ReadFn.is_some() || self.mem_size == 0,
+            "Read Fn must be set if mem size > 0"
+        );
+        assert!(
+            self.raw.WriteFn.is_some() || self.raw.ReadOnly || self.mem_size == 0,
+            "Write Fn must be set if not read only and mem size > 0"
+        );
         self.raw.ReadFn = Some(read_wrapper::<T>);
         self.raw.WriteFn = Some(write_wrapper::<T>);
         self.raw.HighlightFn = if self.highlight_fn.is_some() { Some(highlight_wrapper::<T>) } else { None };
@@ -193,18 +201,18 @@ impl<'a, T> MemoryEditor<'a, T> {
     }
 }
 
+// These shouldn't get called if no fn is set
 unsafe extern "C" fn read_wrapper<'a, T>(data: *const u8, off: usize) -> u8 {
     let (read_fn, _, _, user_data) = &mut *(data as *mut MemData<T>);
-    read_fn.as_mut().expect("No Read Handler Set!")(user_data, off)
+    read_fn.as_mut().unwrap()(user_data, off)
 }
 
 unsafe extern "C" fn write_wrapper<'a, T>(data: *mut u8, off: usize, d: u8) {
     let (_, write_fn, _, user_data) = &mut *(data as *mut MemData<T>);
-    write_fn.as_mut().expect("No Write Handler Set!")(user_data, off, d);
+    write_fn.as_mut().unwrap()(user_data, off, d);
 }
 
 unsafe extern "C" fn highlight_wrapper<'a, T>(data: *const u8, off: usize) -> bool {
     let (_, _, highlight_fn, user_data) = &mut *(data as *mut MemData<T>);
-    // This shouldn't get called if a highlight function wasn't given
     highlight_fn.as_mut().unwrap()(user_data, off)
 }
