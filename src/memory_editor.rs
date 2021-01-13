@@ -1,6 +1,7 @@
-extern crate imgui;
-use imgui::{ImColor, ImStr, Ui};
 use std::ffi::c_void;
+
+use imgui::{ImColor, ImStr, Ui};
+
 
 // TODO: Alias ReadHandlerTrait and writeHandlerTrait to FnMuts once trait_alias is stabilized
 type ReadHandler<'a, T> = Option<Box<dyn FnMut(&T, usize) -> u8 + 'a>>;
@@ -196,10 +197,12 @@ unsafe extern "C" fn read_wrapper<'a, T>(data: *const u8, off: usize) -> u8 {
     let (read_fn, _, _, user_data) = &mut *(data as *mut MemData<T>);
     read_fn.as_mut().expect("No Read Handler Set!")(user_data, off)
 }
+
 unsafe extern "C" fn write_wrapper<'a, T>(data: *mut u8, off: usize, d: u8) {
     let (_, write_fn, _, user_data) = &mut *(data as *mut MemData<T>);
     write_fn.as_mut().expect("No Write Handler Set!")(user_data, off, d);
 }
+
 unsafe extern "C" fn highlight_wrapper<'a, T>(data: *const u8, off: usize) -> bool {
     let (_, _, highlight_fn, user_data) = &mut *(data as *mut MemData<T>);
     // This shouldn't get called if a highlight function wasn't given
