@@ -2,27 +2,24 @@ extern crate imgui;
 use imgui::{ImColor, ImStr, Ui};
 use std::ffi::c_void;
 
-enum Data<'a> {
-    None,
-    Bytes(&'a mut Vec<u8>),
-    Callback(Option<Box<dyn FnMut(usize) -> u8 + 'a>>, Option<Box<dyn FnMut(usize, u8) + 'a>>),
-}
 
-pub struct MemoryEditor<'a> {
+pub struct MemoryEditor<'a, T> {
     window_name: Option<&'a ImStr>,
-    data: Data<'a>,
+    read_fn: Option<Box<dyn FnMut(&T, usize) -> u8 + 'a>>,
+    write_fn: Option<Box<dyn FnMut(&mut T, usize, u8) + 'a>>,
     mem_size: usize,
     base_addr: usize,
     raw: sys::MemoryEditor,
 }
 
-impl<'a> MemoryEditor<'a> {
-    pub fn new() -> MemoryEditor<'a> {
+impl<'a, T> MemoryEditor<'a, T> {
+    pub fn new() -> MemoryEditor<'a, T> {
         let mut raw = Default::default();
         unsafe { sys::Editor_Create(&mut raw) }
         MemoryEditor {
             window_name: None,
-            data: Data::None,
+            read_fn: None,
+            write_fn: None,
             mem_size: 0,
             base_addr: 0,
             raw,
@@ -116,34 +113,17 @@ impl<'a> MemoryEditor<'a> {
     }
     // optional handler to read bytes.
     #[inline]
-    pub fn read_fn<F>(mut self, read_fn: F) -> Self where F: FnMut(usize) -> u8 + 'a {
-        let read_fn = Box::new(read_fn);
-        use Data::Callback;
-        self.data = match self.data {
-            Callback(_, write_fn) => Callback(Some(read_fn), write_fn),
-            _ => Callback(Some(read_fn), None),
-        };
+    pub fn read_fn<F>(mut self, read_fn: F) -> Self where F: FnMut(&T, usize) -> u8 + 'a {
+        self.read_fn = Some(Box::new(read_fn));
         self
     }
     // optional handler to write bytes.
     #[inline]
-    pub fn write_fn<F>(mut self, write_fn: F) -> Self where F: FnMut(usize, u8) + 'a {
-        let write_fn = Box::new(write_fn);
-        use Data::Callback;
-        self.data = match self.data {
-            Callback(read_fn, _) => Callback(read_fn, Some(write_fn)),
-            _ => Callback(None, Some(write_fn)),
-        };
+    pub fn write_fn<F>(mut self, write_fn: F) -> Self where F: FnMut(&mut T, usize, u8) + 'a {
+        self.write_fn = Some(Box::new(write_fn));
         self
     }
 
-    #[inline]
-    // Use a vec with the bytes
-    pub fn bytes(mut self, bytes: &'a mut Vec<u8>) -> Self {
-        self.mem_size = bytes.len();
-        self.data = Data::Bytes(bytes);
-        self
-    }
     // When drawing, create a window with this name
     #[inline]
     pub fn draw_window(mut self, window_name: &'a ImStr) -> Self {
@@ -157,14 +137,19 @@ impl<'a> MemoryEditor<'a> {
         self
     }
 
+    // Draw the memory editor with read and write functions set
     #[inline]
-    pub fn draw(&mut self, _: &Ui) {
+    pub fn draw(&mut self, _: &Ui, user_data: &mut T) {
+        self.raw.ReadFn = Some(read_wrapper::<T>);
+        self.raw.WriteFn = Some(write_wrapper::<T>);
+
+        let mut data = (self as *mut _, user_data);
         if let Some(title) = self.window_name {
             unsafe {
                 sys::Editor_DrawWindow(
                     &mut self.raw,
                     title.as_ptr(),
-                    self.data(),
+                    &mut data as *mut _ as *mut c_void,
                     self.mem_size,
                     self.base_addr,
                 );
@@ -173,46 +158,28 @@ impl<'a> MemoryEditor<'a> {
             unsafe {
                 sys::Editor_DrawContents(
                     &mut self.raw,
-                    self.data(),
+                    &mut data as *mut _ as *mut c_void,
                     self.mem_size,
                     self.base_addr,
                 );
             };
         }
-        
-    }
-
-    fn data(&mut self) -> *mut c_void {
-        self.raw.ReadFn = None;
-        self.raw.WriteFn = None;
-        match &mut self.data {
-            Data::None => panic!("No data specified!"),
-            Data::Bytes(bytes) => bytes.as_mut_ptr() as *mut _ as *mut c_void,
-            Data::Callback(read_fn, write_fn) => {
-                if read_fn.is_some() {
-                    unsafe extern "C" fn read_wrapper(data: *const u8, off: usize) -> u8 {
-                        let data = &mut *(data as *mut Data);
-                        match data {
-                            Data::Callback(read_fn, _) => read_fn.as_mut().unwrap()(off),
-                            _ => unreachable!(),
-                        }
-                    }
-                    self.raw.ReadFn = Some(read_wrapper);
-                }
-                if write_fn.is_some() {
-                    unsafe extern "C" fn write_wrapper(data: *mut u8, off: usize, d: u8) {
-                        let data = &mut *(data as *mut Data);
-                        match data {
-                            Data::Callback(_, write_fn) => write_fn.as_mut().unwrap()(off, d),
-                            _ => unreachable!(),
-                        }
-                    }
-                    self.raw.WriteFn = Some(write_wrapper);
-                }
-                &mut self.data as *mut _ as *mut c_void
-            },
-        }
     }
 }
 
+unsafe extern "C" fn read_wrapper<T>(data: *const u8, off: usize) -> u8 {
+    let (editor, user_data) = &mut *(data as *mut (*mut MemoryEditor<T>, &mut T));
+    let editor = &mut **editor;
 
+    if let Some(read_fn) = editor.read_fn.as_mut() {
+        read_fn(user_data, off)
+    } else { panic!("No Read Handler Set!") }
+}
+unsafe extern "C" fn write_wrapper<T>(data: *mut u8, off: usize, d: u8) {
+    let (editor, user_data) = &mut *(data as *mut (*mut MemoryEditor<T>, &mut T));
+    let editor = &mut **editor;
+
+    if let Some(write_fn) = editor.write_fn.as_mut() {
+        write_fn(user_data, off, d);
+    } else { panic!("No Write Handler Set!") }
+}
