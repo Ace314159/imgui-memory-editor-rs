@@ -194,21 +194,14 @@ impl<'a, T> MemoryEditor<'a, T> {
 
 unsafe extern "C" fn read_wrapper<'a, T>(data: *const u8, off: usize) -> u8 {
     let (read_fn, _, _, user_data) = &mut *(data as *mut MemData<T>);
-
-    if let Some(read_fn) = read_fn {
-        read_fn(user_data, off)
-    } else { panic!("No Read Handler Set!") }
+    read_fn.as_mut().expect("No Read Handler Set!")(user_data, off)
 }
 unsafe extern "C" fn write_wrapper<'a, T>(data: *mut u8, off: usize, d: u8) {
     let (_, write_fn, _, user_data) = &mut *(data as *mut MemData<T>);
-
-    if let Some(write_fn) = write_fn {
-        write_fn(user_data, off, d)
-    } else { panic!("No Write Handler Set!") }
+    write_fn.as_mut().expect("No Write Handler Set!")(user_data, off, d);
 }
 unsafe extern "C" fn highlight_wrapper<'a, T>(data: *const u8, off: usize) -> bool {
     let (_, _, highlight_fn, user_data) = &mut *(data as *mut MemData<T>);
-
     // This shouldn't get called if a highlight function wasn't given
-    (highlight_fn.as_mut().unwrap())(user_data, off)
+    highlight_fn.as_mut().unwrap()(user_data, off)
 }
