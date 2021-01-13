@@ -2,11 +2,15 @@ extern crate imgui;
 use imgui::{ImColor, ImStr, Ui};
 use std::ffi::c_void;
 
+// TODO: Alias ReadHandlerTrait and writeHandlerTrait to FnMuts once trait_alias is stabilized
+type ReadHandler<'a, T> = Option<Box<dyn FnMut(&T, usize) -> u8 + 'a>>;
+type WriteHandler<'a, T> = Option<Box<dyn FnMut(&mut T, usize, u8) + 'a>>;
+type MemData<'a, 'b, T> = (&'b mut ReadHandler<'a, T>, &'b mut WriteHandler<'a, T>, &'b mut T);
 
 pub struct MemoryEditor<'a, T> {
     window_name: Option<&'a ImStr>,
-    read_fn: Option<Box<dyn FnMut(&T, usize) -> u8 + 'a>>,
-    write_fn: Option<Box<dyn FnMut(&mut T, usize, u8) + 'a>>,
+    read_fn: ReadHandler<'a, T>,
+    write_fn: WriteHandler<'a, T>,
     mem_size: usize,
     base_addr: usize,
     raw: sys::MemoryEditor,
@@ -143,13 +147,14 @@ impl<'a, T> MemoryEditor<'a, T> {
         self.raw.ReadFn = Some(read_wrapper::<T>);
         self.raw.WriteFn = Some(write_wrapper::<T>);
 
-        let mut data = (self as *mut _, user_data);
+        let mut data = (&mut self.read_fn, &mut self.write_fn, user_data);
+        let mem_data = &mut data as *mut MemData<T> as *mut c_void;
         if let Some(title) = self.window_name {
             unsafe {
                 sys::Editor_DrawWindow(
                     &mut self.raw,
                     title.as_ptr(),
-                    &mut data as *mut _ as *mut c_void,
+                    mem_data,
                     self.mem_size,
                     self.base_addr,
                 );
@@ -158,7 +163,7 @@ impl<'a, T> MemoryEditor<'a, T> {
             unsafe {
                 sys::Editor_DrawContents(
                     &mut self.raw,
-                    &mut data as *mut _ as *mut c_void,
+                    mem_data,
                     self.mem_size,
                     self.base_addr,
                 );
@@ -167,19 +172,17 @@ impl<'a, T> MemoryEditor<'a, T> {
     }
 }
 
-unsafe extern "C" fn read_wrapper<T>(data: *const u8, off: usize) -> u8 {
-    let (editor, user_data) = &mut *(data as *mut (*mut MemoryEditor<T>, &mut T));
-    let editor = &mut **editor;
+unsafe extern "C" fn read_wrapper<'a, T>(data: *const u8, off: usize) -> u8 {
+    let (read_fn, _, user_data) = &mut *(data as *mut MemData<T>);
 
-    if let Some(read_fn) = editor.read_fn.as_mut() {
+    if let Some(read_fn) = read_fn {
         read_fn(user_data, off)
     } else { panic!("No Read Handler Set!") }
 }
-unsafe extern "C" fn write_wrapper<T>(data: *mut u8, off: usize, d: u8) {
-    let (editor, user_data) = &mut *(data as *mut (*mut MemoryEditor<T>, &mut T));
-    let editor = &mut **editor;
+unsafe extern "C" fn write_wrapper<'a, T>(data: *mut u8, off: usize, d: u8) {
+    let (_, write_fn, user_data) = &mut *(data as *mut MemData<T>);
 
-    if let Some(write_fn) = editor.write_fn.as_mut() {
-        write_fn(user_data, off, d);
+    if let Some(write_fn) = write_fn {
+        write_fn(user_data, off, d)
     } else { panic!("No Write Handler Set!") }
 }
