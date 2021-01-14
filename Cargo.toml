@@ -4,11 +4,12 @@ version = "0.1.3"
 authors = ["Akash Munagala <akash.munagala@gmail.com>"]
 edition = "2018"
 description = "Rust bindings for imgui memory editor"
+readme = "README.md"
+homepage = "https://github.com/Ace314159/imgui-memory-editor-rs"
 repository = "https://github.com/Ace314159/imgui-memory-editor-rs"
+license = "MIT/Apache-2.0"
 keywords = ["imgui", "memory", "editor"]
 categories = ["gui", "api-bindings"]
-readme = "README.md"
-license = "MIT/Apache-2.0"
 
 [dependencies]
 imgui = "0.6.1"
