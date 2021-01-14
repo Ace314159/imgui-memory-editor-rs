@@ -157,7 +157,6 @@ impl<'a, T> MemoryEditor<'a, T> {
     }
 
     // Draw the memory editor with read and write functions set
-    #[inline]
     pub fn draw(&mut self, _: &Ui, user_data: &mut T) {
         assert!(
             self.raw.ReadFn.is_some() || self.mem_size == 0,
@@ -178,26 +177,53 @@ impl<'a, T> MemoryEditor<'a, T> {
             user_data
         );
         let mem_data = &mut data as *mut MemData<T> as *mut c_void;
+        unsafe { self.draw_raw(mem_data) }
+    }
+
+    pub unsafe fn draw_raw(&mut self, mem_data: *mut c_void) {
         if let Some(title) = self.window_name {
-            unsafe {
-                sys::Editor_DrawWindow(
-                    &mut self.raw,
-                    title.as_ptr(),
-                    mem_data,
-                    self.mem_size,
-                    self.base_addr,
-                );
-            };
+            sys::Editor_DrawWindow(
+                &mut self.raw,
+                title.as_ptr(),
+                mem_data,
+                self.mem_size,
+                self.base_addr,
+            );
         } else {
-            unsafe {
-                sys::Editor_DrawContents(
-                    &mut self.raw,
-                    mem_data,
-                    self.mem_size,
-                    self.base_addr,
-                );
-            };
+            sys::Editor_DrawContents(
+                &mut self.raw,
+                mem_data,
+                self.mem_size,
+                self.base_addr,
+            );
         }
+    }
+}
+
+impl<'a> MemoryEditor<'a, &[u8]> {
+    pub fn draw_vec(&mut self, _: &Ui, data: &[u8]) {
+        assert!(!self.raw.ReadOnly, "Data muse be a mutable slice if editor is not read only");
+        // TODO: Support highlight fn
+        assert!(
+            self.read_fn.is_none() && self.write_fn.is_none() && self.highlight_fn.is_none(),
+            "Handler functions not supported when using draw_vec. Use draw instead"
+        );
+        self.mem_size = data.len();
+        unsafe { self.draw_raw(data.as_ptr() as *mut c_void) }
+    }
+}
+
+
+// Convenience implementations
+impl<'a> MemoryEditor<'a, &mut [u8]> {
+    pub fn draw_vec(&mut self, _: &Ui, data: &mut [u8]) {
+        // TODO: Support highlight fn
+        assert!(
+            self.read_fn.is_none() && self.write_fn.is_none() && self.highlight_fn.is_none(),
+            "Handler functions not supported when using draw_vec. Use draw instead"
+        );
+        self.mem_size = data.len();
+        unsafe { self.draw_raw(data.as_mut_ptr() as *mut c_void) }
     }
 }
 
