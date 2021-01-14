@@ -159,11 +159,11 @@ impl<'a, T> MemoryEditor<'a, T> {
     // Draw the memory editor with read and write functions set
     pub fn draw(&mut self, _: &Ui, user_data: &mut T) {
         assert!(
-            self.raw.ReadFn.is_some() || self.mem_size == 0,
+            self.read_fn.is_some() || self.mem_size == 0,
             "Read Fn must be set if mem size > 0"
         );
         assert!(
-            self.raw.WriteFn.is_some() || self.raw.ReadOnly || self.mem_size == 0,
+            self.write_fn.is_some() || self.raw.ReadOnly || self.mem_size == 0,
             "Write Fn must be set if not read only and mem size > 0"
         );
         self.raw.ReadFn = Some(read_wrapper::<T>);
