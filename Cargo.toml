@@ -1,6 +1,6 @@
 [package]
 name = "imgui-memory-editor"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Akash Munagala <akash.munagala@gmail.com>"]
 edition = "2018"
 description = "Rust bindings for imgui memory editor"
