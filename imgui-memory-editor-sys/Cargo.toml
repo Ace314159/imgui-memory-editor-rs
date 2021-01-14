@@ -8,6 +8,7 @@ homepage = "https://github.com/Ace314159/imgui-memory-editor-rs"
 repository = "https://github.com/Ace314159/imgui-memory-editor-rs"
 license = "MIT/Apache-2.0"
 categories = ["gui", "external-ffi-bindings"]
+links = "imgui_memory_editor"
 
 [dependencies]
 cty = "0.2.1"

@@ -11,5 +11,5 @@ fn main() {
     .cpp(true)
     .include(imgui_dir)
     .file("wrapper.cpp")
-    .compile("imgui-memory-editor");
+    .compile("imgui_memory_editor");
 }
