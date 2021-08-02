@@ -1,6 +1,6 @@
 use std::ffi::c_void;
 
-use imgui::{ImColor, ImStr, Ui};
+use imgui::{ImColor32, ImStr, Ui};
 
 
 // TODO: Alias ReadHandlerTrait and writeHandlerTrait to FnMuts once trait_alias is stabilized
@@ -120,7 +120,7 @@ impl<'a, T> MemoryEditor<'a, T> {
     }
     // background color of highlighted bytes.
     #[inline]
-    pub fn highlight_color(mut self, color: ImColor) -> Self {
+    pub fn highlight_color(mut self, color: ImColor32) -> Self {
         self.raw.HighlightColor = color.into();
         self
     }
