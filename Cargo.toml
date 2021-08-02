@@ -12,5 +12,5 @@ keywords = ["imgui", "memory", "editor"]
 categories = ["gui", "api-bindings"]
 
 [dependencies]
-imgui = "0.6.1"
+imgui = "0.7.0"
 imgui-memory-editor-sys = { path = "imgui-memory-editor-sys", version = "0.2.0" }
