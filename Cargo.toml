@@ -1,6 +1,6 @@
 [package]
 name = "imgui-memory-editor"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Akash Munagala <akash.munagala@gmail.com>"]
 edition = "2018"
 description = "Rust bindings for imgui memory editor"
@@ -13,4 +13,4 @@ categories = ["gui", "api-bindings"]
 
 [dependencies]
 imgui = "0.7.0"
-imgui-memory-editor-sys = { path = "imgui-memory-editor-sys", version = "0.2.0" }
+imgui-memory-editor-sys = { path = "imgui-memory-editor-sys", version = "0.3.0" }
